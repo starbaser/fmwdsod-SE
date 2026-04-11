@@ -1,6 +1,4 @@
 """Data models for parsed FMW save files."""
-from typing import Any
-
 import attrs
 
 
@@ -55,26 +53,3 @@ class IntermissionSave:
         m = (int(sec) % 3600) // 60
         s = int(sec) % 60
         return f"{h}:{m:02d}:{s:02d}"
-
-
-@attrs.define
-class RawSaveField:
-    """A single field from file_save.gml for exact rebuild."""
-
-    name: str
-    kind: str  # "scalar", "list", "grid"
-    write_method: str  # "write_string", "write_byte", etc. or "write_list", "write_grid"
-    type_code: int | None = None  # for lists/grids
-    value: Any = None  # scalar value, or list values
-    width: int | None = None  # grid width
-    height: int | None = None  # grid height
-    grid: list[list] | None = None  # grid data (column-major)
-
-
-@attrs.define
-class RawSaveFields:
-    """All 95 fields from file_save.gml, stored for exact rebuild."""
-
-    fields: list[RawSaveField]
-    raw_decrypted: bytearray
-    total_size: int
