@@ -1,8 +1,12 @@
 """GMBIN binary format reader/writer.
 
-Reference: gml_GlobalScript_ds_list_write_ext.gml, gml_GlobalScript_ds_grid_write_ext.gml
+Reference: gml_GlobalScript_ds_list_write_ext.gml, gml_GlobalScript_ds_grid_write_ext.gml,
+           gml_GlobalScript_ds_map_write_ext.gml
 """
+from __future__ import annotations
+
 import struct
+from typing import Any
 
 import attrs
 
@@ -29,6 +33,9 @@ class GmbinReader:
         (v,) = struct.unpack_from("<B", self.buf, self.pos)
         self.pos += 1
         return v
+
+    def read_bool(self) -> bool:
+        return bool(self.read_ubyte())
 
     def read_short(self) -> int:
         (v,) = struct.unpack_from("<h", self.buf, self.pos)
@@ -102,6 +109,18 @@ class GmbinReader:
     def skip_grid(self, type_code: int) -> None:
         self.read_grid(type_code)
 
+    def read_map(self, type_code: int) -> dict[str, Any]:
+        """Read ds_map_write_ext: [int16 count] [string key + typed value]×count."""
+        count = self.read_short()
+        result: dict[str, Any] = {}
+        for _ in range(count):
+            key = self.read_string()
+            result[key] = self._read_element(type_code)
+        return result
+
+    def skip_map(self, type_code: int) -> None:
+        self.read_map(type_code)
+
 
 class GmbinWriter:
     """Builder for GMBIN binary data."""
@@ -112,6 +131,9 @@ class GmbinWriter:
     def write_string(self, s: str) -> None:
         self.buf.extend(s.encode("utf-8"))
         self.buf.append(0)
+
+    def write_bool(self, v: bool) -> None:
+        self.buf.extend(struct.pack("<B", int(v)))
 
     def write_byte(self, v: int) -> None:
         self.buf.extend(struct.pack("<b", v))
@@ -153,6 +175,12 @@ class GmbinWriter:
         for col in range(w):
             for row in range(h):
                 self._write_element(grid[col][row], type_code)
+
+    def write_map(self, d: dict[str, Any], type_code: int) -> None:
+        self.write_short(len(d))
+        for key, val in d.items():
+            self.write_string(key)
+            self._write_element(val, type_code)
 
     def get_bytes(self) -> bytes:
         return bytes(self.buf)
