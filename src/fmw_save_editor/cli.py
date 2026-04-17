@@ -8,7 +8,8 @@ from rich.console import Console
 from rich.table import Table
 
 from .mutators import apply_pp_delta, apply_pp_refund_all, apply_pp_set, write_save
-from .parser import parse_intermission_save
+from .parser import parse_all_fields, parse_intermission_save
+from .rebuilder import write_rebuilt_save
 
 console = Console()
 err_console = Console(stderr=True)
@@ -139,10 +140,52 @@ class RefundAllCmd:
         console.print(f"[green]Saved:[/green] {out}")
 
 
+@attrs.define
+class AddItemCmd:
+    """Add an item to the save by appending to the item lists."""
+
+    save: Annotated[Path, tyro.conf.Positional]
+    item: Annotated[str, tyro.conf.Positional]
+    """Item name to add (e.g. Sunflower)"""
+    output: Path | None = None
+    dry_run: bool = False
+
+    def run(self) -> None:
+        parsed = parse_all_fields(self.save)
+
+        # Field 91 (index 90): ItemID (string list)
+        # Field 92 (index 91): tot_num_of_items (byte list)
+        # Field 93 (index 92): num_of_items (byte list)
+        item_id_field = parsed.fields[90]
+        tot_field = parsed.fields[91]
+        num_field = parsed.fields[92]
+
+        if self.item in item_id_field.value:
+            err_console.print(f"[yellow]Item '{self.item}' already exists in save.[/yellow]")
+            return
+
+        console.print(f"Adding [cyan]{self.item}[/cyan] to save (items: {len(item_id_field.value)} -> {len(item_id_field.value) + 1})")
+
+        item_id_field.value = item_id_field.value + [self.item]
+        tot_field.value = tot_field.value + [1]
+        num_field.value = num_field.value + [1]
+
+        if self.dry_run:
+            console.print("[yellow]Dry run — no file written.[/yellow]")
+            return
+
+        out = self.output or self.save
+        bak = write_rebuilt_save(parsed, out, backup=(out == self.save))
+        if bak:
+            console.print(f"[dim]Backup: {bak}[/dim]")
+        console.print(f"[green]Saved:[/green] {out}")
+
+
 Command = Union[
     Annotated[InfoCmd, tyro.conf.subcommand("info")],
     Annotated[EditCmd, tyro.conf.subcommand("edit")],
     Annotated[RefundAllCmd, tyro.conf.subcommand("refund-all")],
+    Annotated[AddItemCmd, tyro.conf.subcommand("add-item")],
 ]
 
 
