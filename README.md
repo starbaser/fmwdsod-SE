@@ -2,7 +2,7 @@
 
 Decrypt, inspect, and modify save files for Fantasy Maiden Wars: Dream of the Stray Dreamer (Steam App ID: 3575980).
 
-Supports intermission saves (`gsw_NNN.sav`). Quicksave/battle saves (`gsw_qs.sav`, `gsw_as_*.sav`) use a different key and extended format documented in [CLAUDE.md](CLAUDE.md).
+Supports intermission saves (`gsw_NNN.sav`). Quicksave/battle saves (`gsw_qs.sav`, `gsw_as_*.sav`) use a different key and extended format.
 
 ## Install
 
@@ -150,5 +150,3 @@ src/fmw_save_editor/
 ├── mutators.py    # in-place PP patching + write_save
 └── rebuilder.py   # full binary reconstruction + write_rebuilt_save
 ```
-
-See [CLAUDE.md](CLAUDE.md) for the full 95-field format reference, quicksave structure, decompiled GML sources, and innate skill tables.
