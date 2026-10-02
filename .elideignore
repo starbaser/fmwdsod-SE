@@ -1,0 +1,18 @@
+# Paths to strip from public commits (gitignore syntax)
+
+# Editor / OS artifacts
+*.bak
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+plans/
+AGENTS.md
+CLAUDE.md
+RETROSPECTIVE.md

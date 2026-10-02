@@ -1,0 +1,12 @@
+[remotes]
+internal = "fmwdsod-SE-internal"
+public = "fmwdsod-SE"
+
+[branches]
+source = "main"
+public = "public"
+publish = "main"
+
+[publish]
+ignore_file = ".elideignore"
+progress_tag = "last-published"

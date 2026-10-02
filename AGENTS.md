@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+@../eigenpy/CONVENTIONS.md
+
 ## Project
 
 FMW DOSD Save Editor — decrypts, parses, and modifies Fantasy Maiden Wars: Dream of the Stray Dreamer save files.
